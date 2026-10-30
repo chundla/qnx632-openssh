@@ -1,0 +1,22 @@
+# Manual test configuration for this MMI. Host keys and authorized_keys are
+# deliberately supplied separately for each installation.
+Port 2222
+AddressFamily inet
+ListenAddress 192.168.1.1
+HostKey /mnt/ssh/etc/ssh_host_ed25519_key
+PidFile /dev/shmem/mmi-openssh.pid
+AuthorizedKeysFile /mnt/ssh/etc/authorized_keys
+AllowUsers root
+PermitRootLogin prohibit-password
+PubkeyAuthentication yes
+AuthenticationMethods publickey
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitEmptyPasswords no
+StrictModes yes
+UseDNS no
+DisableForwarding yes
+X11Forwarding no
+PermitTunnel no
+Subsystem sftp internal-sftp
+LogLevel VERBOSE
