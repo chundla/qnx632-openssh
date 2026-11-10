@@ -1,12 +1,13 @@
 # Status and validation limits
 
-Documentation review: **2026-11-09**. Committed source reference:
-`602b29795454f6d10625e1e4124cb4e3fafa84c5`. The reviewed working tree also
-contains owner edits to `unit/persistent-start.sh` and `docs/persistent.md`
-for SSH priority, with November 7 installed observations. Those edits are
-not part of the committed source reference. New documentation does not
-establish an installed revision. Read [platform](platform.md) for the
-supported unit and [architecture](architecture.md) for component ownership.
+Documentation review: **2026-11-09**. Original source baseline:
+`602b29795454f6d10625e1e4124cb4e3fafa84c5`. The subsequent SSH-priority
+change in `unit/persistent-start.sh` is tracked together with its November 7
+installed observations in `docs/persistent.md`. It is not part of that
+original baseline. Recording the change in Git does not establish which
+Git revision was installed during the earlier trial. Read
+[platform](platform.md) for the supported unit and
+[architecture](architecture.md) for component ownership.
 
 ## Recorded results
 
@@ -59,6 +60,8 @@ shell enforcement; adding those is follow-up implementation work.
 
 On 2026-11-09, `python3 -m unittest discover -s tests` passed all 18
 host tests, with no skips, against the reviewed working tree. This does
-not exercise the owner's startup-priority changes on hardware.
+not exercise the startup-priority change on hardware. Host shell syntax
+and extracted priority-parser checks also passed for `9r`, `10r`, `13o`
+and a missing priority; they do not validate QNX scheduling.
 No cross-compilation, installation, target execution, reboot, full power-off
 or new randomness assessment is part of this documentation review.

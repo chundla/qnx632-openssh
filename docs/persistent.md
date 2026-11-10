@@ -64,6 +64,41 @@ owned service PIDs alive returns successfully without starting duplicates.
 Startup failure stops the new processes and restores the factory account
 mappings. Logs stay in RAM.
 
+**SSH priority (installed 2026-11-07, effective from the next boot).** The factory
+`lsd.sh` runs the launcher, and so this script, at priority 9, below the
+factory applications' threads at 10. Until this change `sshd`, every session
+and every command run over SSH inherited 9. With the engine running, the
+banner sometimes took more than 15 s. Each login that timed out drew an
+OpenSSH source penalty, and every relayed connection comes from one address,
+so repeated retries had the relay refused for minutes. The script now reads
+its own priority (`pidin -p $$ -F '%p'`) and starts `sshd` through
+`nice -n STEP`, where STEP is that priority minus 10, so `sshd` runs at 10
+from any starting priority. It then checks that the recorded PID is `sshd`
+(this relies on `nice` executing it in place) and reports both priorities on
+its ready line.
+
+Checked on the unit before installing: `pidin -p $$ -F '%p'` printed a
+`prio` header and `  9r`, and the function read 9. `nice -n-1 sleep 3` ran
+at 10 under the same PID. `nice -n -1 sshd -t` exited 0, and `ksh -n` passed.
+The unit's `start.sh` was this repository's version plus one line that the
+Wi-Fi station's en5 installer appends (it starts `/mnt/persistence/en5/start.sh`).
+The installed file is the new version plus that line (cksum `822945085 5448`).
+The previous file is kept as `start.sh.pre-priority` (cksum `702352968 4246`).
+To undo, from an MMI root shell (the SD-card telnet path works without SSH):
+
+```sh
+cp -p /mnt/persistence/openssh/start.sh.pre-priority /mnt/persistence/openssh/start.sh
+```
+
+After the next forced reboot (2026-11-07), the boot log read
+`priority: startup 9, SSH 10 (wanted 10)`. `pidin` showed `sshd`, both
+`sshd-session` processes and the login shell at `10r`, and `jitter-egd`
+unchanged at `1o`. The installed checksum was unchanged, and the en5 line
+ran (its log reported the adapter absent, which happens at some boots).
+Login through the relay took 6 s and the banner 2.9 s, with the engine off.
+Whether the banner stays under 15 s with the engine running has not been
+tested.
+
 ## Access and recovery
 
 The author connects with a dedicated client key and the pinned host key,

@@ -17,7 +17,24 @@ group_source=/mnt/efs-system/etc/group
 mapped=0
 entropy_pid=
 sshd_pid=
+# The factory lsd.sh starts this script at priority 9, below the factory
+# applications' threads at 10. sshd inherited 9, and with the engine running
+# its banner could take more than 15 s (2026-11-07); each login that timed
+# out drew an OpenSSH source penalty until the relay address was refused.
+# sshd, and so every session, runs at 10 whatever priority this script has;
+# nice takes a step relative to it.
+sshd_priority=10
 fail() { echo "OpenSSH startup: $*" >&2; exit 1; }
+# Prints a process's priority (its first thread's), from pidin's prio column.
+priority_of() {
+    pidin -p "$1" -F '%p' > "$state/priority.txt" 2>/dev/null || return 1
+    found=
+    while read -r value; do
+        case "$value" in [0-9]*) [ -n "$found" ] || found=${value%%[!0-9]*} ;; esac
+    done < "$state/priority.txt"
+    rm -f "$state/priority.txt"
+    [ -n "$found" ] && echo "$found"
+}
 owned_pid() {
     [ -f "$1" ] || return 1
     read -r checked_pid < "$1"
@@ -91,10 +108,16 @@ until grep -q '^JITTER_EGD_READY ' "$state/entropy.log"; do
     attempt=$((attempt + 1))
 done
 /mnt/ssh/sbin/sshd -t -f /mnt/ssh/etc/sshd_config
-(trap '' 1; exec /mnt/ssh/sbin/sshd -D -e -f /mnt/ssh/etc/sshd_config > "$state/sshd.log" 2>&1) &
+start_priority=$(priority_of $$) || fail "Cannot read the startup priority."
+priority_step=$((start_priority - sshd_priority))
+(trap '' 1; exec nice -n "$priority_step" /mnt/ssh/sbin/sshd -D -e -f /mnt/ssh/etc/sshd_config \
+    > "$state/sshd.log" 2>&1) &
 sshd_pid=$!
 echo "$sshd_pid" > "$state/sshd.pid"
 sleep 2
 kill -0 "$sshd_pid" 2>/dev/null || fail "SSH startup failed; see $state/sshd.log."
+owned_pid "$state/sshd.pid" '/mnt/ssh/sbin/sshd' || fail "The SSH PID is not sshd."
+sshd_now=$(priority_of "$sshd_pid") || sshd_now=unknown
 /bin/ksh "$root/firewall.sh" enable
-echo "OpenSSH ready on 192.168.1.1:2222; entropy PID $entropy_pid; SSH PID $sshd_pid."
+echo "OpenSSH ready on 192.168.1.1:2222; entropy PID $entropy_pid; SSH PID $sshd_pid;"
+echo "priority: startup $start_priority, SSH $sshd_now (wanted $sshd_priority)."
