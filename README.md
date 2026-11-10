@@ -20,6 +20,15 @@ Nothing here has been checked on another train, region or MU variant.
 | [docs/randomness.md](docs/randomness.md) | Why Jitterentropy, the SH timer adapter, the EGD service and its NIST SP800-90B raw-noise assessment |
 | [docs/persistent.md](docs/persistent.md) | The persistent installation on the test unit, start-up behaviour, rollback and validation |
 
+## Contributor reading order
+
+Start with [AGENTS.md](AGENTS.md), [platform constraints](docs/platform.md),
+[architecture and code map](docs/architecture.md), then [current status](docs/status.md).
+Use the detailed build, randomness and persistent-installation documents
+above for the task. These guides require no research-workspace checkout.
+The status page distinguishes the committed baseline from the owner's
+November 7 startup-priority changes and installed observations.
+
 ## Layout
 
 | Path | Contents |
@@ -43,9 +52,10 @@ are not a substitute: the unit has `libc.so.2`, not `libc.so.3`.
 ```sh
 python3 extract_qnx632.py /path/to/qnx_linux_setup.jar work/sdk
 # put the signature-checked openssh-10.6p1.tar.gz in work/downloads/
+mkdir -p work/work
 git clone --depth 1 --branch v3.7.0 \
   https://github.com/smuellerDD/jitterentropy-library.git \
-  work/jitterentropy-library-3.7.0
+  work/work/jitterentropy-library-3.7.0
 sh build-jitter.sh
 sh build.sh
 ```

@@ -40,7 +40,7 @@ key are the same as in the tested RAM installation.
 
 On 2026-10-30 a second public key, for the owner's phone SSH client, was
 appended to `/mnt/persistence/openssh/etc/authorized_keys` for the
-[Wi-Fi station's 7.3 run](https://github.com/chundla/mmi3g-wifi-sta/blob/main/docs/wifi-client-mode.md#phase-73-results), with the original kept
+[Wi-Fi station's 7.3 run](https://github.com/chundla/mmi3g-wifi-sta/blob/8226f4a9473838d1b0178e55e8a6786ff45045c4/docs/wifi-client/wifi-client-mode.md#phase-73-results), with the original kept
 beside it on the HDD. The file stayed mode 600. Both `sshd` instances and
 the station's read it.
 
@@ -78,7 +78,7 @@ A USB Ethernet path (`en5`) reaches a second `sshd` directly, with no Pi
 in between. It measured about 149 KB/s and, unlike the Wi-Fi path, it
 survives the access point being switched off. Both instances share the
 host key and authorized keys. See
-[en5 established](https://github.com/chundla/mmi3g-wifi-sta/blob/main/docs/wifi-client-mode.md#en5-established) for the interface itself and the
+[en5 established](https://github.com/chundla/mmi3g-wifi-sta/blob/8226f4a9473838d1b0178e55e8a6786ff45045c4/docs/wifi-client/wifi-client-mode.md#en5-established) for the interface itself and the
 `pf` exposure that comes with it; its start-up script is in the
 [Wi-Fi station repository](https://github.com/chundla/mmi3g-wifi-sta).
 
